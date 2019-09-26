@@ -11,6 +11,10 @@ Game::Game(const int& X, const int& Y, const std::string& GameName)
 	: m_ScreenSize(X, Y), m_GameName(GameName) {
 }
 
+Game::Game(const std::string& GameName)
+	: m_GameName(GameName) {
+}
+
 Game::~Game() {
 }
 

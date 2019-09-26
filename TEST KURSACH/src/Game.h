@@ -9,6 +9,7 @@ private:
 public:
 	Game();
 	Game(const int& X, const int& Y, const std::string& GameName);
+	Game(const std::string& GameName);
 	~Game();
 	void Run();
 };
