@@ -1,8 +1,9 @@
-#include <iostream>
 #include "Game.h"
+#include <iostream>
+#include <vector>
 
 int main() {
-	Game sample("GAME");
-	sample.Run();
+	Game TestGame(1280,720,"test");
+	TestGame.Run();
 	return 0;
 }
