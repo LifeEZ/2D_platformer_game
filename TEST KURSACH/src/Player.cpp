@@ -2,10 +2,12 @@
 #include <iostream>
 
 Player::Player() {
+	m_HealthBar = new HealthBar();
 }
 
 Player::Player(Level& Level, const float& X, const float& Y)
 : Entity(X, Y) {
+	m_HealthBar = new HealthBar();
 	m_Animation = LoadAnimations();
 	m_Key.insert(std::pair<std::string, bool>("R", false));
 	m_Key.insert(std::pair<std::string, bool>("L", false));
@@ -18,9 +20,6 @@ Player::~Player() {
 }
 
 void Player::Control() {
-	//if (m_State == hit) {
-	//	m_HitTimer = 0;
-	//}
 	if (m_State != jump) {
 		m_Animation.SetFrame("jump", 0);
 	}
@@ -29,6 +28,12 @@ void Player::Control() {
 	}
 	if (m_State != attack) {
 		m_Animation.SetFrame("attack", 0);
+	}
+	if (m_State != hit) {
+		m_Animation.SetFrame("hit", 0);
+	}
+	if (m_State == hit) {
+		m_State = idle;
 	}
 	if (m_State == attack) {
 		m_State = idle;
@@ -49,6 +54,7 @@ void Player::Control() {
 		m_Key.at("A") = true;
 	}
 	m_Attacked = Attacking;
+
 	if (m_Key.at("A")) {
 		if (m_State != jump && m_State != attack) {
 			m_dx = 0;
@@ -77,6 +83,7 @@ void Player::Control() {
 		if (m_State == idle)
 			m_State = walk;
 	}
+
 	if (m_Key.at("U")) {
 		if (m_State != jump && m_State != attack && m_OnGround) {
 			m_dy = -0.5f;
@@ -89,10 +96,6 @@ void Player::Control() {
 		if (m_State == walk)
 			m_State = idle;
 	}
-	//if (!m_Key["Down"]) {
-	//	if (m_State == duck)
-	//		m_State = idle;
-	//}
 	m_Key.at("R") = false;
 	m_Key.at("L") = false;
 	m_Key.at("U") = false;
@@ -122,28 +125,19 @@ void Player::Update(const float& time, std::vector<Entity*>& enteties, Entity& p
 		if (m_Animation.GetName() != "attack")
 			m_Animation.Set("attack");
 		break;
+	case hit:
+		if (m_Animation.GetName() != "hit")
+			m_Animation.Set("hit");
+		break;
+	case dead:
+		if (m_Animation.GetName() != "dead")
+			m_Animation.Set("dead");
+		break;
 	}
-	int a = rand() % 100;
-	//if (a % 23 == 0)
-	//	m_Control ? std::cout << "on\n" : std::cout << "off\n";
-		//switch (m_State) {
-		//case Player::walk:
-		//	std::cout << "state: walk\n";
-		//	break;
-		//case Player::idle:
-		//	std::cout << "state: idle\n";
-		//	break;
-		//case Player::jump:
-		//	std::cout << "state: jump\n";
-		//	break;
-		//case Player::attack:
-		//	std::cout << "state: attack\n";
-		//	break;
-		//case Player::hit:
-		//	std::cout << "state: hit\n";
-		//	break;
-		//}
-	m_Animation.Update(time, (m_Direction == left ? Animation::AnimDirection::left : Animation::AnimDirection::right));
+	m_HealthBar->Update(m_Health);
+	if (m_Animation.GetCurrentFrame("dead") < 5) {
+		m_Animation.Update(time, (m_Direction == left ? Animation::AnimDirection::left : Animation::AnimDirection::right));
+	}
 
 	m_X += m_dx * time;
 	CheckCollisionWithMap(m_dx, 0);
@@ -151,45 +145,58 @@ void Player::Update(const float& time, std::vector<Entity*>& enteties, Entity& p
 	m_Y += m_dy * time;
 	CheckCollisionWithMap(0, m_dy);
 	UpdateHitTrigger();
-	//if (a % 97 == 0)
-	//	std::cout << "X " << m_HitTrigger.left << " Y " << m_HitTrigger.top << " witdth "<< m_HitTrigger.width << " height " << m_HitTrigger.height << "PlayerX + W" << m_X + m_W << "\n";
-	if (m_Health <= 0)
-		m_Alive = false;
-
-	if (m_Alive)
-		SetCoordForView(m_X, m_Y);
-
-	for (size_t i = 0; i < enteties.size(); i++) {
-		if (GetRect().intersects(enteties.at(i)->GetRect()) && !m_Hit) {
-			DamageBy(10);
-			m_dy = -0.3f;
-			m_OnGround = false;
-			(enteties.at(i)->GetPosX() - m_X) > 0 ? m_dx = -GetSpeed(): m_dx = GetSpeed();
-			m_Hit = true;
+	if (m_Health <= 0 && m_State != dead) {
+		SetState(dead);
+		m_dx = 0.f;
+		m_Control = false;
+	}
+	if (m_State == dead) {
+		float tmpTime = time;
+		m_DeathTimer += tmpTime;
+		if (m_DeathTimer >= 3000) {
+			m_LvlEnd.first = true;
+			m_LvlEnd.second = 0;
 		}
 	}
-	if (m_State == attack && m_Attacked && !m_Hit && m_HitTriggerOn) {
+	SetCoordForView(m_X, m_Y);
+	//if (!m_Immune) {
+	//	for (size_t i = 0; i < enteties.size(); i++) {
+	//		if (GetRect().intersects(enteties.at(i)->GetRect())) {
+	//			if (player.GetState() != hit) {
+	//				DamageBy(10);
+	//			}
+	//			(enteties.at(i)->GetPosX() - m_X) > 0 ? m_dx = -GetSpeed() : m_dx = GetSpeed();
+	//			SetState(hit);
+	//			m_Immune = true;
+	//		}
+	//	}
+	//}
+	//else {
+	//	m_ImmuneTimer += time / 1.2f;
+	//	if (m_ImmuneTimer >= 2000.f)
+	//		m_Immune = false;
+	//}
+	//??????????????????
+	if (m_State == attack && m_Attacked && m_HitTriggerOn) {
 		for (size_t i = 0; i < enteties.size(); i++) {
-			if (m_HitTrigger.intersects(enteties.at(i)->GetRect())) {
+			if (m_HitTrigger.intersects(enteties.at(i)->GetRect()) && (enteties.at(i)->GetState() != hit)) {
 				enteties.at(i)->DamageBy(10);
-				if ((m_X - enteties.at(i)->GetPosX()) > 0)
-					enteties.at(i)->SetDeltaX(-enteties.at(i)->GetSpeed());
-				else
-					enteties.at(i)->SetDeltaX(enteties.at(i)->GetSpeed());
-				enteties.at(i)->m_Hit = true;
+				enteties.at(i)->SetDeltaX(0.f);
+				enteties.at(i)->SetState(hit);
+				enteties.at(i)->SetControl(false);
 			}
 		}
 	}
 
-	if (m_Hit) {
+	if (m_State == hit) {
 		m_Control = false;
 		float tmpTime = time;
 		m_HitTimer += tmpTime;
-		if (m_HitTimer >= 700) {
+
+		if (m_HitTimer >= 500) {
 			m_Control = true;
 		}
-		if (m_HitTimer >= 1700) {
-			m_Hit = false;
+		if (m_HitTimer >= 2000) {
 			m_HitTimer = 0;
 		}
 	}
@@ -198,8 +205,8 @@ void Player::Update(const float& time, std::vector<Entity*>& enteties, Entity& p
 		if (!m_AttackTimer)
 			m_Control = false;
 		float tmpTime = time;
-		m_AttackTimer += tmpTime/1.3f;
-		//if (m_AttackTimer >= 500)
+		m_AttackTimer += tmpTime / 1.3f;
+		if (m_AttackTimer >= 500)
 			m_HitTriggerOn = true;
 		if (m_AttackTimer >= 1200) {
 			m_HitTriggerOn = false;
@@ -217,7 +224,8 @@ void Player::CheckCollisionWithMap(const float& dx, const float& dy) {
 					m_Y = m_Objects[i].rect.top - m_H;
 					m_dy = 0;
 					if(!m_OnGround)
-						m_State = idle;
+						if(m_State != hit)
+							m_State = idle;
 					m_OnGround = true;
 				}
 				if (dy < 0) {
@@ -233,8 +241,20 @@ void Player::CheckCollisionWithMap(const float& dx, const float& dy) {
 					m_dx = 0;
 				}
 			}
+			if (m_Objects[i].name == "end_level") {
+				m_LvlEnd.first = true;
+				m_LvlEnd.second = 1;
+			}
 		}
 	}
+}
+
+std::pair<bool,size_t> Player::LvlEnd() {
+	return m_LvlEnd;
+}
+
+HealthBar& Player::GetHealthBar() {
+	return *m_HealthBar;
 }
 
 AnimationManager& Player::LoadAnimations() {
@@ -251,6 +271,10 @@ AnimationManager& Player::LoadAnimations() {
 	TmpAnimation->CreateAnimation("attack", "attack", 0, 0, 112, 67, 7, 112, 0.005f);
 	TmpAnimation->SetOffsetX("attack", 48, 32);
 	TmpAnimation->SetOffsetY("attack", 3);
+	TmpAnimation->CreateAnimation("hit", "hitA", 0, 0, 80, 64, 4, 80, 0.005f);
+	TmpAnimation->SetOffsetX("hit", 16, 32);
+	TmpAnimation->CreateAnimation("dead", "dead", 0, 0, 80, 64, 6, 80, 0.005f);
+	TmpAnimation->SetOffsetX("dead", 32, 16);
 
 	return *TmpAnimation;
 }

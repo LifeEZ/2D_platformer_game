@@ -75,6 +75,10 @@ void Entity::HealBy(const int& Heal) {
 	m_Health += Heal;
 }
 
+void Entity::SetControl(const bool& Control) {
+	m_Control = Control;
+}
+
 void Entity::UpdateHitTrigger() {
 	m_HitTrigger.top = m_Y;
 	m_Direction == left ? m_HitTrigger.left = m_X - m_HitTrigger.width : m_HitTrigger.left = m_X + m_W;

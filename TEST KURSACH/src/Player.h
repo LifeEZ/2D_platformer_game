@@ -1,9 +1,11 @@
 #pragma once
 #include "Entity.h"
+#include "HealthBar.h"
 
 class Player : public Entity {
 protected:
-	bool m_HitTriggerOn = false;
+	HealthBar* m_HealthBar = nullptr;
+	std::pair<bool, size_t> m_LvlEnd = { false, 0 };
 	bool m_Attacked = false;
 	bool m_Jumped = false;
 	int m_Score = 0;
@@ -15,6 +17,8 @@ public:
 	void Update(const float& time, std::vector<Entity*>& enteties, Entity& player) override;
 	void Control();
 	void CheckCollisionWithMap(const float& dx, const float& dy) override;
+	std::pair<bool, size_t> LvlEnd();
+	HealthBar& GetHealthBar();
 
 	AnimationManager& LoadAnimations() override;
 

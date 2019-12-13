@@ -19,8 +19,9 @@ Enemy::Enemy() {
 
 void Enemy::ChoosePath(Entity& player) {
 	if (player.GetPosY() != GetPosY()) {
-		if (m_Aggro)
+		if (m_Aggro) {
 			m_Aggro = false;
+		}
 		for (size_t i = 0; i < m_Objects.size(); i++) {
 			if (!((m_Y + m_H) == m_Objects.at(i).rect.top)) {
 				continue;
@@ -34,17 +35,20 @@ void Enemy::ChoosePath(Entity& player) {
 			m_ChosenObjectIndex = i;
 		}
 	}
-	for (size_t i = 0; i < m_Objects.size(); i++) {
-		if (!((player.GetPosY() + player.GetHeight()) == m_Objects.at(i).rect.top)) {
-			continue;
-		}
-		if (!((player.GetPosX() <= m_Objects.at(i).rect.left + m_Objects.at(i).rect.width) && (player.GetPosX() >= m_Objects.at(i).rect.left))) {
-			continue;
-		}
-		float PlayerObjectLeft = m_Objects.at(i).rect.left;
-		float PlayerObjectRight = m_Objects.at(i).rect.left + m_Objects.at(i).rect.width;
-		if ((PlayerObjectLeft == m_PathBorders.LeftPoint - 32) && (PlayerObjectRight == m_PathBorders.RightPoint + 32)) {
-			m_Aggro = true;
+	else {
+		for (size_t i = 0; i < m_Objects.size(); i++) {
+
+			if (!((player.GetPosY() + player.GetHeight()) == m_Objects.at(i).rect.top)) {
+				continue;
+			}
+			if (!((player.GetPosX() -32 <= m_Objects.at(i).rect.left + m_Objects.at(i).rect.width) && (player.GetPosX() +32>= m_Objects.at(i).rect.left))) {
+				continue;
+			}
+			float PlayerObjectLeft = m_Objects.at(i).rect.left;
+			float PlayerObjectRight = m_Objects.at(i).rect.left + m_Objects.at(i).rect.width;
+			if ((PlayerObjectLeft <= m_X) && (PlayerObjectRight >= m_X)) {
+				m_Aggro = true;
+			}
 		}
 	}
 }
@@ -55,7 +59,8 @@ void Enemy::UpdateState() {
 	if (!GetDeltaX()) {
 		SetState(idle);
 	}
-	SetState(walk);
+	else 
+		SetState(walk);
 }
 
 void Enemy::Move(const float& time, Entity& player) {
@@ -75,9 +80,17 @@ void Enemy::Move(const float& time, Entity& player) {
 	}
 	if (m_Aggro) {
 		if (m_HitTrigger.intersects(player.GetRect())) {
-			m_Prev_dx = GetDeltaX();
-			m_dx = 0;
-			SetState(attack);
+			if(m_dx)
+				m_Prev_dx = m_dx;
+			if (m_PreAttackTimer >= 400) {
+				m_Attack = false;
+			}
+			SetDeltaX(0);
+			if (GetState() != hit && GetState() != attack) {
+				SetState(idle);
+			}
+			if (!m_Attack)
+				m_Attack = true;
 			return;
 		}
 		if (player.GetPosX() > GetPosX()) {
@@ -118,21 +131,22 @@ void Enemy::CheckCollisionWithMap(const float& dx, const float& dy) {
 }
 
 void Enemy::Update(const float& time, std::vector<Entity*>& enteties, Entity& player) {
-	int a = rand() % 100;
-	if (a % 97 == 0) {
-		std::cout << "Left " << m_PathBorders.LeftPoint << " Right " << m_PathBorders.RightPoint << "\n";
-		std::cout << "X " << m_X << " Y " << m_Y << "\n";
+	if (m_State != attack) {
+		m_Animation.SetFrame("attack", 0);
+	}
+	if (m_State != hit) {
+		m_Animation.SetFrame("hit", 0);
 	}
 	ChoosePath(player);
-	if (m_Control) {
+	if (m_Control && !m_Attack) {
 		UpdateState();
 		Move(time, player);
-		if (GetDeltaX() > 0 && m_Direction == left) {
-			m_Direction = right;
-		}
-		if (GetDeltaX() < 0 && m_Direction == right) {
-			m_Direction = left;
-		}
+	}
+	if (GetDeltaX() > 0 && m_Direction == left) {
+		m_Direction = right;
+	}
+	if (GetDeltaX() < 0 && m_Direction == right) {
+		m_Direction = left;
 	}
 	switch (m_State) {
 	case walk:
@@ -149,7 +163,30 @@ void Enemy::Update(const float& time, std::vector<Entity*>& enteties, Entity& pl
 		if (m_Animation.GetName() != "attack")
 			m_Animation.Set("attack");
 		break;
+	case hit:
+		if (m_Animation.GetName() != "hit")
+			m_Animation.Set("hit");
+		break;
 	}
+	int a = rand() % 100;
+	if(a % 5 == 0)
+		switch (m_State) {
+		case Entity::walk:
+			std::cout << "walk\n";
+			break;
+		case Entity::idle:
+			std::cout << "idle\n";
+			break;
+		case Entity::jump:
+			std::cout << "jump\n";
+			break;
+		case Entity::attack:
+			std::cout << "attack\n";
+			break;
+		case Entity::hit:
+			std::cout << "hit\n";
+			break;
+		}
 	m_Animation.Update(time, (m_Direction == left ? Animation::AnimDirection::left : Animation::AnimDirection::right));
 
 	m_X += m_dx * time;
@@ -162,27 +199,56 @@ void Enemy::Update(const float& time, std::vector<Entity*>& enteties, Entity& pl
 	if (m_Health <= 0)
 		m_Alive = false;
 
-	if (m_Hit) {
-		if (!m_HitTimer)
-			m_Control = false;
-		m_HitTimer += time;
-		if (m_HitTimer >= 2000) {
+	if (m_State == attack && m_Aggro && m_HitTriggerOn) {
+		if (m_HitTrigger.intersects(player.GetRect())) {
+			if (player.GetState() != hit && player.GetState() != dead) {
+				player.DamageBy(50);
+			}
+			player.SetDeltaX(0.f);
+			player.SetControl(false);
+			if(player.GetState() != dead)
+				player.SetState(hit);
+		}
+	}
+
+	if (m_State == hit) {
+		if (m_Aggro)
+			m_Aggro = false;
+		m_Attack = false;
+		m_Control = false;
+		float tmpTime = time;
+		m_HitTimer += tmpTime;
+		if (m_HitTimer >= 1000) {
 			m_Control = true;
-			m_Hit = false;
 			m_HitTimer = 0;
 		}
 	}
 
 
+	if (m_Attack) {
+		float tmpTime = time;
+		m_PreAttackTimer += tmpTime;
+		if (m_PreAttackTimer >= 400) {
+			if (m_State != hit) {
+				SetState(attack);
+				m_Attack = false;
+			}
+		}
+	}
 	if (m_State == attack) {
+		float tmpTime = time;
 		if (!m_AttackTimer)
 			m_Control = false;
-		m_AttackTimer += time;
+		m_AttackTimer += tmpTime;
+		if (m_AttackTimer >= 1000)
+			m_HitTriggerOn = true;
 		if (m_AttackTimer >= 2000) {
+			m_HitTriggerOn = false;
 			m_Control = true;
 			m_AttackTimer = 0;
 			m_Aggro = false;
 			SetDeltaX(m_Prev_dx);
+			m_PreAttackTimer = 0;
 		}
 	}
 }
@@ -197,8 +263,10 @@ AnimationManager& Enemy::LoadAnimations() {
 	TmpAnimation->CreateAnimation("walk", "walk_swordsman", 0, 0, 64, 64, 4, 64, 0.005f);
 	TmpAnimation->SetOffsetX("walk", 16, 32);
 	TmpAnimation->CreateAnimation("attack", "attack_swordsman", 0, 0, 112, 96, 8, 112, 0.005f);
-	TmpAnimation->SetOffsetX("attack", 48, 48);
+	TmpAnimation->SetOffsetX("attack", 64, 32);
 	TmpAnimation->SetOffsetY("attack", 32);
+	TmpAnimation->CreateAnimation("hit", "hit_swordsman", 0, 0, 64, 64, 3, 64, 0.005f);
+	TmpAnimation->SetOffsetX("hit", 16, 32);
 
 	return *TmpAnimation;
 }

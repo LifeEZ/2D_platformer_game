@@ -22,7 +22,10 @@ protected:
 		float RightPoint = 0.f;
 	} m_PathBorders;
 	bool m_Aggro = false;
+	bool m_Attack = false;
 	Direction m_PrevDirection = left;
 	float m_IdleTimer = 0.f;
+	float m_PreAttackTimer = 0.f;
+	float m_PostAttackTimer = 0.f;
 	float m_Prev_dx = 0.f;
 };

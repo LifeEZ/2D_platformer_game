@@ -167,6 +167,7 @@
     <ClCompile Include="src\Entity.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\Animation.cpp" />
+    <ClCompile Include="src\HealthBar.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="level.cpp" />
@@ -182,6 +183,7 @@
     <ClInclude Include="src\Entity.h" />
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\Animation.h" />
+    <ClInclude Include="src\HealthBar.h" />
     <ClInclude Include="src\Player.h" />
     <ClInclude Include="TinyXML\tinystr.h" />
     <ClInclude Include="TinyXML\tinyxml.h" />

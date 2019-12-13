@@ -6,7 +6,7 @@
 
 class Entity {
 public:
-	enum StateObject { walk, idle, jump, attack, hit };
+	enum StateObject { walk, idle, jump, attack, hit, dead };
 	enum Direction { left, right };
 protected:
 	AnimationManager m_Animation;
@@ -17,16 +17,17 @@ protected:
 	float m_dx = 0.f, m_dy = 0.f;
 	int m_W = 32, m_H = 64;
 	float m_Speed = 0.15f;
-	bool m_Control = true;
 	int m_Health = 100;
 	bool m_Alive = true;
 	bool m_OnGround = false;
+	bool m_HitTriggerOn = false;
 	Direction m_Direction = right;
 	std::string name = "name";
 	float m_HitTimer = 0.f;
 	float m_AttackTimer = 0.f;
+	bool m_Control = true;
+	float m_DeathTimer = 0.f;
 public:
-	bool m_Hit = false;
 	Entity();
 	Entity(const float& X, const float& Y);
 	virtual ~Entity();
@@ -47,6 +48,7 @@ public:
 	void SetDeltaY(const float& dy);
 	void DamageBy(const int& Damage);
 	void HealBy(const int& Heal);
+	void SetControl(const bool& Control);
 	void SetState(const StateObject& State);
 	const StateObject& GetState();
 	void UpdateHitTrigger();
