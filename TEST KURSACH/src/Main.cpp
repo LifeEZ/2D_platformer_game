@@ -1,9 +1,7 @@
 #include "Game.h"
-#include <iostream>
-#include <vector>
 
 int main() {
-	Game TestGame(1280, 720, "test");
-	TestGame.Run();
+	Game test_game(1280, 720, "test");
+	test_game.Run();
 	return 0;
 }

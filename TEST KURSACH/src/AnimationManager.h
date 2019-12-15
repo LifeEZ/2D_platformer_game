@@ -9,7 +9,7 @@ public:
 	AnimationManager();
 	~AnimationManager();
 
-	std::string GetName();
+	std::string GetName() const;
 	int GetCurrentFrame(const std::string& name);
 	int GetFramesAmount(const std::string& name);
 

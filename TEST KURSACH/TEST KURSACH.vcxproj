@@ -171,6 +171,7 @@
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="level.cpp" />
+    <ClCompile Include="src\Scoreboard.cpp" />
     <ClCompile Include="TinyXML\tinystr.cpp" />
     <ClCompile Include="TinyXML\tinyxml.cpp" />
     <ClCompile Include="TinyXML\tinyxmlerror.cpp" />
@@ -185,6 +186,7 @@
     <ClInclude Include="src\Animation.h" />
     <ClInclude Include="src\HealthBar.h" />
     <ClInclude Include="src\Player.h" />
+    <ClInclude Include="src\Scoreboard.h" />
     <ClInclude Include="TinyXML\tinystr.h" />
     <ClInclude Include="TinyXML\tinyxml.h" />
   </ItemGroup>

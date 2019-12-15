@@ -1,21 +1,18 @@
 #include "Animation.h"
 #include <iostream>
 
-Animation::~Animation() {
-	//delete m_Texture;
-	//delete m_Sprite;
-}
+Animation::~Animation() = default;
 
 Animation::Animation() {
 	m_Texture = new sf::Texture();
 	m_Sprite = new sf::Sprite();
 }
 
-float Animation::GetOffsetX() {
+float Animation::GetOffsetX() const {
 	return m_OffsetX;
 }
 
-float Animation::GetOffsetY() {
+float Animation::GetOffsetY() const {
 	return m_OffsetY;
 }
 
@@ -56,7 +53,7 @@ void Animation::Rotate() {
 	m_Direction == right ? m_Direction = left : m_Direction = right;
 }
 
-sf::Sprite* Animation::GetSprite() {
+sf::Sprite* Animation::GetSprite() const {
 	return m_Sprite;
 }
 
@@ -78,19 +75,19 @@ Animation::Animation(const std::string& ImgDirectory, const int& X, const int& Y
 	(*m_Sprite).setTexture(*m_Texture);
 	for (unsigned int i = 0; i < FramesCount; i++) {
 		m_Frames.emplace_back(sf::IntRect(X + i * FramesStep, Y, W, H));
-		m_FlipedFrames.emplace_back(sf::IntRect(X + i * FramesStep + W, Y, -W, H));
+		m_FlippedFrames.emplace_back(sf::IntRect(X + i * FramesStep + W, Y, -W, H));
 	}
 }
 
-void Animation::Tick(const float& time) {
+void Animation::Tick(const float& Time) {
 	if (!m_IsPlaying)
 		return;
-	m_CurrentFrame += m_Speed * time;
+	m_CurrentFrame += m_Speed * Time;
 	if (m_CurrentFrame >= m_Frames.size())
 		m_CurrentFrame = 0;
 	if (m_Direction == left) {
 		try {
-			(*m_Sprite).setTextureRect(m_FlipedFrames.at(static_cast<int>(m_CurrentFrame)));
+			(*m_Sprite).setTextureRect(m_FlippedFrames.at(static_cast<int>(m_CurrentFrame)));
 		}
 		catch (const std::exception& ex) {
 			std::cout << ex.what() << " 3\n";

@@ -1,12 +1,10 @@
 #include "AnimationManager.h"
 
-AnimationManager::AnimationManager() {
-}
+AnimationManager::AnimationManager() = default;
 
-AnimationManager::~AnimationManager() {
-}
+AnimationManager::~AnimationManager() = default;
 
-std::string AnimationManager::GetName() {
+std::string AnimationManager::GetName() const {
 	return m_CurrentAnimation;
 }
 

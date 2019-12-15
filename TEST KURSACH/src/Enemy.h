@@ -5,12 +5,12 @@ class Enemy : public Entity {
 public:
 	~Enemy();
 	Enemy();
-	void ChoosePath(Entity& player);
+	Enemy(Level& Level, const float& X, const float& Y, const int& Damage, const int& Health);
+	void ChoosePath(Entity& Player);
 	void UpdateState();
-	void Move(const float& time, Entity& player);
-	Enemy(Level& Level, const float& X, const float& Y);
-	void CheckCollisionWithMap(const float& dx, const float& dy) override;
-	void Update(const float& time, std::vector<Entity*>& enteties, Entity& player) override;
+	void Move(const float& Time, Entity& Player);
+	void CheckCollisionWithMap(const float& Dx, const float& Dy) override;
+	void Update(const float& Time, std::vector<Entity*>& Entities, Entity& Player) override;
 	AnimationManager& LoadAnimations() override;
 protected:
 	float m_CurrentPath = 0.f;
@@ -27,5 +27,5 @@ protected:
 	float m_IdleTimer = 0.f;
 	float m_PreAttackTimer = 0.f;
 	float m_PostAttackTimer = 0.f;
-	float m_Prev_dx = 0.f;
+	float m_PrevDx = 0.f;
 };

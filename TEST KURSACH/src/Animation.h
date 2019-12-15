@@ -10,7 +10,7 @@ public:
 		float RightDirOffset;
 	};
 private:
-	std::vector<sf::IntRect> m_Frames, m_FlipedFrames;
+	std::vector<sf::IntRect> m_Frames, m_FlippedFrames;
 	float m_Speed = 0.1f;
 	bool m_IsPlaying = true;
 	float m_CurrentFrame = 0.f;
@@ -21,8 +21,8 @@ private:
 	sf::Texture* m_Texture = nullptr;
 	sf::Sprite* m_Sprite = nullptr;
 public:
-	float GetOffsetX();
-	float GetOffsetY();
+	float GetOffsetX() const;
+	float GetOffsetY() const;
 	void SetOffsetX(const float& LeftOffset, const float& RightOffset);
 	void SetOffsetY(const float& Offset);
 	void UpdateOffsetDir();
@@ -30,13 +30,13 @@ public:
 	void SetCurrentFrame(const int& Frame);
 	int GetFramesAmount() const;
 	AnimDirection GetDirection() const;
-	void SetDirection(const Animation::AnimDirection& Direction);
+	void SetDirection(const AnimDirection& Direction);
 	void Rotate();
-	sf::Sprite* GetSprite();
+	sf::Sprite* GetSprite() const;
 	void Pause();
 	void Play();
 	Animation(const std::string& ImgDirectory, const int& X, const int& Y, const int& W, const int& H, const unsigned int& FramesCount, const int& FramesStep, const float& PlaySpeed = 0.01f);
 	Animation();
 	virtual ~Animation();
-	void Tick(const float& time);
+	void Tick(const float& Time);
 };

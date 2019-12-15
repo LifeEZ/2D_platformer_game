@@ -3,41 +3,41 @@
 #include <vector>
 #include <map>
 #include "SFML/Graphics.hpp"
-#include <iostream>
 #include "TinyXML/tinyxml.h"
 
 struct Object {
-	int GetPropertyInt(std::string name);//proprety's number in list
-	float GetPropertyFloat(std::string name);
-	std::string GetPropertyString(std::string name);
+	int GetPropertyInt(const std::string& Name);//property's number in list
+	float GetPropertyFloat(const std::string& Name);
+	std::string GetPropertyString(const std::string& Name);
 
-	std::string name;
-	std::string type;
-	sf::Rect<float> rect;
-	std::map<std::string, std::string> properties;
+	std::string Name;
+	std::string Type;
+	sf::Rect<float> Rect;
+	std::map<std::string, std::string> Properties;
 
-	sf::Sprite sprite;
+	sf::Sprite Sprite;
 };
 
 struct Layer {
-	int opacity = 0;
-	std::vector<sf::Sprite> tiles;
+	int Opacity = 0;
+	std::vector<sf::Sprite> Tiles;
 };
 
 class Level {
 public:
-	bool LoadFromFile(std::string filename);//return false if loading is failed
-	Object GetObject(std::string name);
-	std::vector<Object> GetObjects(std::string name);//getting all found objects
-	std::vector<Object> GetAllObjects();//getting all objects
-	void Draw(sf::RenderWindow &window);//drawing level
-	sf::Vector2i GetTileSize();//getting size of tile
-
+	bool LoadFromFile(const std::string& Filename);//return false if loading is failed
+	Object GetObject(const std::string& Name);
+	std::vector<Object> GetObjects(const std::string& Name);//getting all found objects
+	std::vector<Object> GetAllObjects() const;//getting all objects
+	void Draw(sf::RenderWindow &Window);//drawing level
+	sf::Vector2i GetTileSize() const;//getting size of tile
+	const int& GetWidth() const;
+	const int& GetHeight() const;
 private:
-	int width = 0, height = 0, tileWidth = 0, tileHeight = 0;
-	int firstTileID = 0;
-	sf::Rect<float> drawingBounds;
-	sf::Texture tilesetImage;
-	std::vector<Object> objects;
-	std::vector<Layer> layers;
+	int m_Width = 0, m_Height = 0, m_TileWidth = 0, m_TileHeight = 0;
+	int m_FirstTileId = 0;
+	sf::Rect<float> m_DrawingBounds;
+	sf::Texture m_TileSetImage;
+	std::vector<Object> m_Objects;
+	std::vector<Layer> m_Layers;
 };
