@@ -1,2 +1,2 @@
-# TEST_COURSEWORK
-COURSE
+# 2D_platformer_game
+2D_platformer_game
